@@ -15,6 +15,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.thinkpalm.moviecatalogservice.models.CatalogItem;
 import com.thinkpalm.moviecatalogservice.models.Movie;
 import com.thinkpalm.moviecatalogservice.models.Rating;
+import com.thinkpalm.moviecatalogservice.models.UserRating;
+
 
 @RestController
 @RequestMapping("catalog")
@@ -27,42 +29,37 @@ public class MovieCatalogResource {
 	private WebClient.Builder webClientBuilder;
 	
 	@RequestMapping("/{userId}")
-	public List<CatalogItem> getCatalog(@PathVariable("userId") String id){
+	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 		
 		//RestTemplate restTemplate = new RestTemplate();
 		
-		// get all rated movie IDs
-		
-		
-		// for each movie ID call, movie info service and get details	
+		// get all rated movie IDs			
 		
 		//WebClient.Builder builder = WebClient.builder();
 		
-		List<Rating> ratings = Arrays.asList(
-				new Rating("1234", 4),
-				new Rating("5678", 3)
-		);
+		UserRating ratings = restTemplate.getForObject("http://localhost:8083/ratingsdata/users/"
+				+ userId, UserRating.class);
 		
-		return ratings.stream().map(rating-> {
+		return ratings.getUserRating().stream().map(rating-> {
+			// For each movie ID, call movie info service and get details
 			Movie movie = restTemplate.getForObject("http://localhost:8082/movies/"
-				+ rating.getMovieId(), Movie.class);
-			
-//			Movie movie = webClientBuilder.build()
-//				.get()
-//				.uri("http://localhost:8082/movies/" + rating.getMovieId())
-//				.retrieve()
-//				.bodyToMono(Movie.class)
-//				.block();
-			
+				+ rating.getMovieId(), Movie.class);			
+			// Put them all together
 			return new CatalogItem(movie.getName(), "Desc", rating.getRating());
 		})
 		.collect(Collectors.toList());
 		
-		
-		
-		// Put them all together
 //		return Collections.singletonList(
 //				new CatalogItem("Transformers","test", 4)
 //		);
 	}
 }
+
+/*
+Movie movie = webClientBuilder.build()
+.get()
+.uri("http://localhost:8082/movies/" + rating.getMovieId())
+.retrieve()
+.bodyToMono(Movie.class)
+.block();
+*/
