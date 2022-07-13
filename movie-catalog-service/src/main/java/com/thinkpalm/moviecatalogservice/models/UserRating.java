@@ -9,19 +9,24 @@ import java.util.List;
 
 public class UserRating {
 	
-	public UserRating() {
+	private String userId;
+    private List<Rating> ratings;
 
-	}
+    public String getUserId() {
+        return userId;
+    }
 
-	private List<Rating> userRating;
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-	public List<Rating> getUserRating() {
-		return userRating;
-	}
+    public List<Rating> getRatings() {
+        return ratings;
+    }
 
-	public void setUserRating(List<Rating> userRating) {
-		this.userRating = userRating;
-	}
+    public void setRatings(List<Rating> ratings) {
+        this.ratings = ratings;
+    }
 	
 
 }
