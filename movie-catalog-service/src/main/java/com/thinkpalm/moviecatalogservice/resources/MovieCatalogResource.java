@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.thinkpalm.moviecatalogservice.models.CatalogItem;
 import com.thinkpalm.moviecatalogservice.models.Movie;
 import com.thinkpalm.moviecatalogservice.models.Rating;
@@ -29,6 +30,7 @@ public class MovieCatalogResource {
 	private WebClient.Builder webClientBuilder;
 	
 	@RequestMapping("/{userId}")
+	@HystrixCommand
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 		
 		//RestTemplate restTemplate = new RestTemplate();
@@ -58,6 +60,7 @@ public class MovieCatalogResource {
 }
 
 /*
+Alternative WebClient way
 Movie movie = webClientBuilder.build()
 .get()
 .uri("http://localhost:8082/movies/" + rating.getMovieId())
