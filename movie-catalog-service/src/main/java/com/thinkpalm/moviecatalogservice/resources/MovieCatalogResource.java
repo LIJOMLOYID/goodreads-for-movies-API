@@ -17,6 +17,8 @@ import com.thinkpalm.moviecatalogservice.models.CatalogItem;
 import com.thinkpalm.moviecatalogservice.models.Movie;
 import com.thinkpalm.moviecatalogservice.models.Rating;
 import com.thinkpalm.moviecatalogservice.models.UserRating;
+import com.thinkpalm.moviecatalogservice.services.MovieInfo;
+import com.thinkpalm.moviecatalogservice.services.UserRatingInfo;
 
 
 @RestController
@@ -29,6 +31,12 @@ public class MovieCatalogResource {
 	@Autowired
 	private WebClient.Builder webClientBuilder;
 	
+	@Autowired
+	MovieInfo movieInfo;
+	
+	@Autowired
+	UserRatingInfo userRatingInfo;
+	
 	@RequestMapping("/{userId}")
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 		
@@ -38,44 +46,15 @@ public class MovieCatalogResource {
 		
 		//WebClient.Builder builder = WebClient.builder();
 		
-		UserRating userRating = getUserRating(userId);
+		UserRating userRating = userRatingInfo.getUserRating(userId);
 		
 		return userRating.getRatings().stream()
-				.map(rating-> getCatalogItem(rating))		
+				.map(rating-> movieInfo.getCatalogItem(rating))		
 				.collect(Collectors.toList());
 		
 //		return Collections.singletonList(
 //				new CatalogItem("Transformers","test", 4)
 //		);
-	}
-
-	@HystrixCommand(fallbackMethod="getFallbackCatalogItem")
-	private CatalogItem getCatalogItem(Rating rating) {
-		// For each movie ID, call movie info service and get details
-		Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"
-			+ rating.getMovieId(), Movie.class);			
-		// Put them all together
-		return new CatalogItem(movie.getName(),  movie.getDescription(), rating.getRating());
-	}
-	
-	private CatalogItem getFallbackCatalogItem(Rating rating) {		
-		return new CatalogItem("Movie name not found",  "", rating.getRating());		
-	}
-	
-	
-	@HystrixCommand(fallbackMethod="getFallbackUserRating")
-	private UserRating getUserRating(@PathVariable("userId") String userId) {
-		return restTemplate.getForObject("http://ratings-data-service/ratingsdata/user/"
-				+ userId, UserRating.class);
-	}
-	
-	private UserRating getFallbackUserRating(@PathVariable("userId") String userId) {
-		UserRating userRating = new UserRating();
-		userRating.setUserId(userId);
-		userRating.setRatings(Arrays.asList(
-				new Rating("0",0)
-				));
-			return userRating;
 	}
 	
 }
